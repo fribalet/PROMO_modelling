@@ -45,22 +45,22 @@ data_dist2 <- function(params, ...) measure_distance2(params, mydata)
 # Grazer subset: low/high grazer treatments; exclude near-zero loss
 mydata.Grazer <- data_w %>%
   filter(treatment %in% c("Low grazer", "High grazer")) %>%
-  filter(loss_Prochlorococcus > 0.05) %>%
+  filter(loss_pro > 0.05) %>%
   mutate(
-    x       = abundance_Prochlorococcus,
-    predator = abundance_Grazer,
-    y       = x * loss_Prochlorococcus / predator
+    x       = abundance_pro,
+    predator = abundance_grazer,
+    y       = x * loss_pro / predator
   )
 
 # Phage subset: low/high virus treatments; also exclude unreliably high lysis
 mydata.Phage <- data_w %>%
   filter(treatment %in% c("High virus", "Low virus")) %>%
-  filter(loss_Prochlorococcus > 0.05) %>%
-  filter(abundance_Prochlorococcus * loss_Prochlorococcus / abundance_Phage < 0.07) %>%
+  filter(loss_pro > 0.05) %>%
+  filter(abundance_pro * loss_pro / abundance_phage < 0.07) %>%
   mutate(
-    x        = abundance_Prochlorococcus,
-    predator = abundance_Phage,
-    y        = x * loss_Prochlorococcus / predator
+    x        = abundance_pro,
+    predator = abundance_phage,
+    y        = x * loss_pro / predator
   )
 
 # DEoptim control settings
@@ -193,24 +193,26 @@ write_csv(param_table, "outputs/parameter_estimates.csv")
 data_w3 <- data_w %>%
   ungroup() %>%
   mutate(
-    x       = abundance_Prochlorococcus,
-    predator = abundance_Grazer,
-    y       = x * loss_Prochlorococcus / predator) %>%
+    x       = abundance_pro,
+    predator = abundance_grazer,
+    y       = x * loss_pro / predator) %>%
   mutate(
-    theoretical.loss.Phage_Prochlorococcus  = model_pp(params.Phage[1],  .) * abundance_Phage  / abundance_Prochlorococcus,
-    theoretical.loss.Grazer_Prochlorococcus = model_pp(params.Grazer[1], .) * abundance_Grazer / abundance_Prochlorococcus,
-    theoretical.loss_Prochlorococcus        = theoretical.loss.Grazer_Prochlorococcus +
-                                               theoretical.loss.Phage_Prochlorococcus
+    theoretical.loss.Phage_pro  = model_pp(params.Phage[1],  .) * abundance_phage  / abundance_pro,
+    theoretical.loss.Grazer_pro = model_pp(params.Grazer[1], .) * abundance_grazer / abundance_pro,
+    theoretical.loss_pro        = theoretical.loss.Grazer_pro +
+                                   theoretical.loss.Phage_pro
   ) %>%
   mutate(across(contains("theoretical"), ~ if_else(. == 0, NA_real_, .))) %>%
   mutate(across(contains("abundance"),   ~ .x * 1e7)) %>%    # restore original units
   mutate(
-    theoretical.loss_Prochlorococcus = if_else(
-      str_detect(treatment, "virus")  & abundance_Phage  == 0, NA_real_, theoretical.loss_Prochlorococcus),
-    theoretical.loss_Prochlorococcus = if_else(
-      str_detect(treatment, "grazer") & abundance_Grazer == 0, NA_real_, theoretical.loss_Prochlorococcus)
+    theoretical.loss_pro = if_else(
+      str_detect(treatment, "virus")  & abundance_phage  == 0, NA_real_, theoretical.loss_pro),
+    theoretical.loss_pro = if_else(
+      str_detect(treatment, "grazer") & abundance_grazer == 0, NA_real_, theoretical.loss_pro)
   ) %>%
   select(-x, -predator, -y) %>%
   arrange(time)
 
 message("Model fitting complete. GOF and parameter tables written to outputs/.")
+
+

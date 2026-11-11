@@ -34,8 +34,8 @@ The analysis pipeline:
 ├── analysis.R                 ← Master script: runs the full pipeline
 ├── .gitignore
 ├── data/
-│   ├── data.csv               ← Input time-series data
-│   └── README.md              ← Data dictionary (column definitions, units, notes)
+│   ├── Figure_1_SourceData.csv← Input time-series data
+│   └── treatment_table.csv    ← Name of each treatment
 ├── R/
 │   ├── 01_preprocessing.R     ← Load data, interpolate NAs, smooth with spline
 │   ├── 02_growth_mortality.R  ← Net growth rates and mortality rates

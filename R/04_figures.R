@@ -44,10 +44,10 @@ ggsave("figures/fig_phage_fit.png", p_phage, width = 6, height = 4, dpi = 300)
 # Figure S3 – Observed vs. theoretical mortality, all treatments
 # -----------------------------------------------------------------------------
 p_all <- data_w3 %>%
-  ggplot(aes(time, loss_Prochlorococcus * abundance_Prochlorococcus, group = series)) +
+  ggplot(aes(time, loss_pro * abundance_pro, group = series)) +
   geom_line(col = "grey") +
   geom_point(aes(
-    y   = theoretical.loss_Prochlorococcus * abundance_Prochlorococcus,
+    y   = theoretical.loss_pro * abundance_pro,
     col = series
   )) +
   facet_wrap(~ treatment) +
@@ -74,7 +74,7 @@ data_mean <- data_w3 %>%
     names_to  = c(".value", "population"),
     names_sep = "_"
   ) %>%
-  filter(population == "Prochlorococcus") %>%
+  filter(population == "pro") %>%
   filter(treatment %in% selected_treatments) %>%
   mutate(abundance = abundance / 1e7) %>%
   group_by(population, time, treatment) %>%
@@ -97,21 +97,28 @@ data_mean <- data_w3 %>%
   mutate(source = factor(source,
     levels = c("Observed", "Grazing", "Lysis", "Total"),
     labels = c("Observed", "Grazing", "Lysis", "Grazing + Lysis")
-  ))
+  )) %>%
+  # In single-predator treatments the total equals the one non-NA component,
+  # so drawing it would hide that component's line; keep it only when both exist.
+  group_by(treatment) %>%
+  filter(!(source == "Grazing + Lysis" &
+             (all(is.na(mean[source == "Grazing"])) |
+              all(is.na(mean[source == "Lysis"]))))) %>%
+  ungroup()
 
 p_fig2 <- data_mean %>%
   ggplot(aes(time, mean, group = source)) +
   geom_ribbon(
-    data = data_mean %>% filter(source != "Observed"),
+    data = data_mean %>% filter(!is.na(mean)) %>% filter(source != "Observed"),
     aes(ymin = mean - sd, ymax = mean + sd, fill = source),
     alpha = 0.3, show.legend = FALSE
   ) +
-  geom_line(aes(col = source)) +
+  geom_line(data = data_mean %>% filter(!is.na(mean)), aes(col = source)) +
   geom_point(
     data = data_mean %>% filter(source == "Observed"),
     aes(time, mean)
   ) +
-  geom_linerange(
+  geom_pointrange(
     data = data_mean %>% filter(source == "Observed"),
     aes(time, ymin = mean - sd, ymax = mean + sd),
     lwd = 0.5
@@ -128,11 +135,11 @@ p_fig2 <- data_mean %>%
   ) +
   facet_wrap(treatment ~ ., ncol = 1) +
   theme_pub +
-  theme(legend.position = c(0.7, 0.05)) +
+  theme(legend.position = c(0.2, 0.1)) +
   labs(
     x = "Time (h)",
     y = expression(paste("Mortality (10"^7, " cells mL"^{-1}, " h"^{-1}, ")"))
-  )
+  ) 
 
 ggsave("figures/fig2_mortality_mean.png", p_fig2, width = 6, height = 14, dpi = 300)
 

@@ -2,27 +2,38 @@
 # 01_preprocessing.R
 # Load raw data, interpolate missing values, and smooth abundance time series.
 # =============================================================================
-
 library(tidyverse)
 library(zoo)
 
 # -----------------------------------------------------------------------------
 # 1. Load data
 # -----------------------------------------------------------------------------
-pre_data <- read_csv("data/data.csv", show_col_types = FALSE)
+# data shown in Fig 1 or manuscript
+pre_data <- read_csv("data/Figure_1_SourceData.csv") %>%
+  rename(series = Replicate,
+         population = Type,
+         abundance = Value,
+         time = Time,
+         replicate = Treatment)
+
+# metadata
+tt <- read_csv("data/treatment_table.csv")
+
+# merge metadata with raw data, and create new variables for replicate and experiment
+data <- left_join(pre_data, tt, by = "series", keep = FALSE) %>%
+  mutate(replicate = substr(series, 1, 1),
+         experiment = paste(replicate, treatment))
 
 # -----------------------------------------------------------------------------
 # 2. Interpolate across NAs
 # NAs are filled by extending the nearest non-NA edge values within each
 # population × series group.  Rows that remain NA (e.g., leading/trailing NAs
 # that cannot be extended) are dropped.
-# Series C2 is truncated at time < 30 due to poor extrapolation behaviour.
 # -----------------------------------------------------------------------------
-data <- pre_data %>%
+data <- data %>%
   group_by(population, series, .drop = FALSE) %>%
   mutate(abundance = zoo::na.fill(abundance, fill = "extend")) %>%
-  filter(!is.na(abundance)) %>%
-  filter(!(series == "C2" & time < 30))
+  filter(!is.na(abundance))
 
 # -----------------------------------------------------------------------------
 # 3. Smooth abundance using a cubic spline (spar = 0.5)

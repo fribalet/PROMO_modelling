@@ -1,0 +1,46 @@
+series,treatment
+A1,Control
+A2,Low grazer - high virus
+A3,Low virus
+A4,Low grazer - high virus
+A5,High grazer - very high virus
+A6,High virus
+A7,High grazer - very high virus
+A8,Grazer and virus - no Pro
+A9,Virus only
+A10,Grazer and virus - no Pro
+B1,Control
+B2,Low grazer - high virus
+B3,Low virus
+B4,Low grazer - high virus
+B5,High grazer - very high virus
+B6,High virus
+B7,High grazer - very high virus
+B8,Grazer and virus - no Pro
+B9,Virus only
+B10,Grazer and virus - no Pro
+C1,Control
+C2,Low grazer - high virus
+C3,Low virus
+C4,Low grazer - high virus
+C5,High grazer - very high virus
+C6,High virus
+C7,High grazer - very high virus
+C8,Grazer and virus - no Pro
+C9,Virus only
+C10,Grazer and virus - no Pro
+D1,Control
+D2,Low grazer - high virus
+D3,Low grazer - high virus
+D4,Low grazer - high virus
+D5,High grazer early - very high virus
+D6,High grazer early - very high virus
+D7,High grazer early - very high virus
+E1,Control
+E2,Low grazer 
+E3,Low grazer 
+E4,Low grazer 
+E5,High grazer
+E6,High grazer
+E7,High grazer
+E8,Grazer only

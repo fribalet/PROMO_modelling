@@ -21,17 +21,19 @@ data <- data %>%
 # Calculated for bacterial and Prochlorococcus populations only;
 # other populations receive NaN.
 # -----------------------------------------------------------------------------
-bacterial_populations <- c("Prochlorococcus", "Bacteria", "smallBacteria", "largeBacteria")
+bacterial_populations <- c("pro", "bacteria", "HDNAbacteria", "LDNAbacteria")
 
 data <- data %>%
   group_by(population, replicate, time, .drop = FALSE) %>%
   mutate(
     loss = case_when(
-      population %in% bacterial_populations ~ net[treatment == "Control"] - net,
+      population %in% bacterial_populations ~
+        first(net[treatment == "Control"], default = NA_real_) - net,
       TRUE ~ NaN
     ),
     # Clamp negative loss values to zero
     loss = if_else(loss < 0, 0, loss)
-  )
+  ) %>%
+  ungroup()
 
 message("Growth and mortality rates calculated. `data` object updated.")
