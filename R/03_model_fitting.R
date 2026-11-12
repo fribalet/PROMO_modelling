@@ -213,6 +213,7 @@ data_w3 <- data_w %>%
   select(-x, -predator, -y) %>%
   arrange(time)
 
+write_csv(data_w3, "outputs/mortality_predictions.csv")
+
+
 message("Model fitting complete. GOF and parameter tables written to outputs/.")
-
-
